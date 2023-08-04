@@ -1,9 +1,11 @@
 ##########################################################################
-#########################################################################
-#this script turns the presence/absence data (sp_data) and covariates##
-#into the correct format for jags model##################################
-#
-
+##########################################################################
+##This script runs a hierarchical site occupancy-detection model in JAGS##
+#####It uses a 4D array  [visit, site, sample,qPCR] and covarites for#####
+##each time period post fire, burnt status of the site and water volume###
+########################for each sample###################################
+##########################################################################
+##########################################################################
 
 
 # packages ----------------------------------------------------------------
@@ -14,13 +16,13 @@ library(jagsUI)
 
 # data --------------------------------------------------------------------
 
+load("data.RData")
 
-
-load("model1_sp_data.RData") #4d array [visit, site, sample,qPCR]
-load("model1_I_after1.RData") #1 year post-fire
-load("model1_I_after2.RData") #2 years post-fire
-load("model1_I_burnt.RData") #Burnt status of watershed
-load("model1_volume.RData") #volume of water filtered per sample
+#model1_sp_data= 4d array [visit, site, sample,qPCR]
+#model1_I_after1=1 year post-fire
+#model1_I_after2=2 years post-fire
+#model1_I_burnt=Burnt status of watershed
+#model1_volume=volume of water filtered per sample
 
 
 #model -----------------------------------------------------------
@@ -96,8 +98,8 @@ cat("
     ",fill = TRUE)
 sink()
 
-zst<-matrix(data=1,nrow=3,ncol=118)
-ast<-array(1, c(3,118, 2))
+zst<-matrix(data=1,nrow=3,ncol= dim(model1_sp_data)[2])
+ast<-array(1, c(3, dim(model1_sp_data)[2], 2))
 
 ast <- apply(model1_sp_data, c(1,2,3), max)   # inits for availability (a)
 ast[is.na(ast)] <- 1

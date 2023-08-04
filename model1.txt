@@ -1,0 +1,59 @@
+
+    model {
+    
+    # Priors
+    
+    # - Occupancy
+    for(j in 1:nsite){
+    int.psi[j] ~ dunif(0,1)
+    }
+    # - eDNA availability
+    
+    int.theta ~ dunif(0,1) # Intercepts availability probability
+    
+    #detection
+    int.p ~ dunif(0,1)
+  
+    
+    # Hyperpriors
+    # - occupancy
+    betaBA1 ~ dnorm(0, 0.1)
+    betaBA1burnt ~ dnorm(0, 0.1)
+    betaBA2 ~ dnorm(0, 0.1)
+    betaBA2burnt ~ dnorm(0, 0.1)
+    betaBurnt ~ dnorm(0, 0.1)
+    beta_volume~ dnorm(0, 0.1)
+    
+    
+    # Ecological process 
+    for(i in 1:nvisit){
+    for(j in 1:nsite){
+    logit(pocc[i, j]) <-logit(int.psi[j])  + betaBA1 * I_after1[i, j]  + betaBA2 * I_after2[i, j] +betaBurnt* I_burnt[i, j]+
+    betaBA1burnt * I_after1[i, j] * I_burnt[i, j] + betaBA2burnt * I_after2[i, j] * I_burnt[i, j]
+    z[i, j] ~ dbern(pocc[i, j])
+    
+    
+    for (k in 1:nrep){
+    # Occurrence in sample j
+    a[i,j,k] ~ dbern(mu.a[i,j,k])
+    mu.a[i,j,k] <- z[i, j] * theta[i,j,k]
+    cloglog(theta[i,j,k]) <- cloglog(int.theta)+beta_volume*volume[i,j,k]
+    
+    
+    
+    # Observation process
+    
+    for(l in 1:npcr){
+    
+    logit(p[i, j, k, l])<- logit(int.p)
+    mu.p[i, j, k, l] <-  a[i,j,k] *p[i, j,k,l]
+    
+    model1_sp_data[i, j, k, l] ~ dbern(mu.p[i, j, k,l])
+    
+    }
+    }
+    }
+    }
+    
+    }
+    

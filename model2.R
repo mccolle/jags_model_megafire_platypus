@@ -1,10 +1,12 @@
-
 ##########################################################################
-#########################################################################
-#this script formats the presence/absence data (sp_data) and covariates##
-#into the correct format for jags model##################################
-#
-
+##########################################################################
+##This script runs a hierarchical site occupancy-detection model in JAGS##
+#####It uses a 4D array  [visit, site, sample,qPCR] and covarites for#####
+##################each time period post fire############################## 
+##########burnt status of the site including fire severity################
+###as well as rainfall in a watershed and water volume for each sample####
+##########################################################################
+##########################################################################
 
 
 # packages ----------------------------------------------------------------
@@ -15,16 +17,15 @@ library(jagsUI)
 
 # data --------------------------------------------------------------------
 
+load("data.RData")
 
-
-load("model2_sp_data.RData") #4d array [visit, site, sample,qPCR]
-load("model2_I_after1.RData") #1 year post-fire
-load("model2_I_after2.RData") #2 years post-fire
-load("model2_h_sev.RData") #high severity fire
-load("model2_l_sev.RData") #low severity fire
-load("model2_rain.RData") #rainfall
-load("model2_volume.RData") #volume of water filtered per sample
-
+#model2_sp_data=4d array [visit, site, sample,qPCR]
+#model2_I_after1=1 year post-fire
+#model2_I_after2=2 years post-fire
+#model2_h_sev=high severity fire
+#model2_l_sev=low severity fire
+#model2_rain=rainfall
+#model2_volume=volume of water filtered per sample
 
 
 
@@ -129,10 +130,10 @@ cat("
     ",fill = TRUE)
 sink()
 
-zst<-matrix(data=1,nrow=3,ncol=nsite)
-ast<-array(1, c(3,nsite, 2))
+zst<-matrix(data=1,nrow=3,ncol= dim(model2_sp_data)[2])
+ast<-array(1, c(3, dim(model2_sp_data)[2], 2))
 
-ast <- apply(sp_data, c(1,2,3), max)   # inits for availability (a)
+ast <- apply(model2_sp_data, c(1,2,3), max)   # inits for availability (a)
 ast[is.na(ast)] <- 1
 
 inits <- function() list(z = zst, a = ast)
